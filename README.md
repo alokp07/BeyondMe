@@ -17,7 +17,8 @@ This repo is **configuration only**. It contains no API keys and no chat history
 | `extensions/beyondme-branding/` | Renames SillyTavern → beyondme in the interface |
 | `summarize-prompt.txt` | The summariser prompt (event + "who knows what" tracking) |
 | `settings-values.json` | The few settings the setup depends on |
-| `install.py` | Copies everything into place and patches those settings |
+| `install.bat` / `install.sh` | Double-click (Windows) or run (Mac/Linux) to install |
+| `install.js` | What those call — copies everything into place and patches the settings |
 
 ---
 
@@ -54,12 +55,21 @@ cd BeyondMe
 
 ### Step 4 — copy it into the app
 
+**Windows:** double-click **`install.bat`**
+
+**Mac / Linux:** `./install.sh`
+
+If it can't find SillyTavern by itself, give it the path from step 1:
+
 ```bash
-python install.py "C:\path\to\SillyTavern"
+node install.js "C:\path\to\SillyTavern"
 ```
 
-Use the path to the folder from step 1. The installer prints everything it
-copies. It never touches your API keys or your chats.
+> No Python needed — the installer runs on **Node.js**, which SillyTavern
+> already requires. If SillyTavern runs on the machine, this will too.
+
+It prints everything it copies, and never touches your API keys, your chats,
+or your persona.
 
 ### Step 5 — add your own API key
 
