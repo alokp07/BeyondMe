@@ -1,0 +1,30 @@
+# ============================================================
+# beyondme — private data must NEVER be committed.
+#
+# This repo carries configuration only: prompts, presets, the
+# character card, and the UI extension. Nothing personal.
+# ============================================================
+
+# API keys — the one file that must never leave your machine
+secrets.json
+*secret*
+*.key
+
+# your conversations
+chats/
+backups/
+vectors/
+*.jsonl
+*.jsonl.backup
+
+# your account / persona
+settings.json
+User Avatars/
+personas/
+thumbnails/
+
+# SillyTavern runtime junk
+node_modules/
+.DS_Store
+Thumbs.db
+*.log

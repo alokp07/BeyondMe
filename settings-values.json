@@ -1,0 +1,13 @@
+{
+    "temp_openai": 1.2,
+    "fast_ui_mode": true,
+    "reduced_motion": true,
+    "blur_strength": 0,
+    "shadow_width": 0,
+    "timestamps_enabled": false,
+    "timestamp_model_icon": false,
+    "chat_display": 0,
+    "sort_field": "date_last_chat",
+    "sort_order": "desc",
+    "summary_promptWords": 550
+}

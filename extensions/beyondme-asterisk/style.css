@@ -1,0 +1,637 @@
+/* ============================================================
+   beyondme UI  —  phone-first chat interface
+
+   Depth comes from layered transparency over the background
+   image, NOT from backdrop-filter. Blur is what made the phone
+   lag, so it stays gone by design.
+
+   Layout:
+   - No avatar side column (index.js moves it into the header)
+   - Character left, you right
+   - Narration muted on its own line, speech bright
+   - Chat header with back arrow; icon row hidden until scroll-up
+   ============================================================ */
+
+:root {
+    --bm-ink:        #e9e9f2;
+    --bm-ink-user:   #f5f3fd;
+    --bm-muted:      #9a9ab0;
+    --bm-name:       #bcaaf7;
+    --bm-name-user:  #ded6fb;
+    --bm-line:       rgba(255, 255, 255, 0.08);
+
+    --bm-scrim:      rgba(10, 10, 16, 0.80);
+    --bm-bubble:     rgba(22, 22, 31, 0.86);
+    --bm-bubble-brd: rgba(255, 255, 255, 0.07);
+    --bm-user-a:     #5f50ad;
+    --bm-user-b:     #453a7d;
+    --bm-chip:       rgba(255, 255, 255, 0.07);
+}
+
+/* ---------------------------------------------------- chat header */
+
+/* Transparent and borderless so it reads as floating over the conversation
+   rather than a second bar stacked on the browser's. */
+/* One bar: back + who you're talking to + the model switcher.
+   It OVERLAYS the chat (absolute, not a flex row) so it never crops the
+   conversation, and slides out of the way while you read. */
+#bm-chat-header {
+    display: none;                     /* phone only — enabled below */
+    align-items: center;
+    gap: 10px;
+    padding: 10px 14px 16px;
+    background: linear-gradient(180deg,
+                rgba(9, 9, 14, 0.99) 0%,
+                rgba(9, 9, 14, 0.95) 45%,
+                rgba(9, 9, 14, 0.6) 75%,
+                rgba(9, 9, 14, 0) 100%);
+    border: none;
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    z-index: 40;
+    transform: translateY(-115%);
+    transition: transform 0.18s ease;
+    pointer-events: none;
+}
+body.bm-header-show #bm-chat-header {
+    transform: translateY(0);
+    pointer-events: auto;
+}
+
+/* title takes the slack so the model button sits at the right edge */
+#bm-title { flex: 1 1 auto; min-width: 0; }
+
+/* SillyTavern's connection/model drawer button, re-homed into this bar.
+   Its .drawer class is flex:1 upstream, which swallowed the whole bar and
+   squeezed the title to zero width — hence the hard override. */
+#bm-chat-header .bm-adopted {
+    position: static !important;
+    flex: 0 0 auto !important;
+    width: auto !important;
+    min-width: 0 !important;
+    margin: 0 0 0 auto !important;
+}
+#bm-chat-header .bm-adopted .drawer-icon {
+    opacity: 0.85;
+    font-size: 1.02rem;
+    color: var(--bm-ink);
+    padding: 4px 2px;
+}
+#bm-back,
+#bm-title { text-shadow: 0 1px 6px rgba(0, 0, 0, 0.85); }
+
+/* the character panel has its own wordmark — don't stack two titles */
+body.bm-panel-open #bm-chat-header { display: none !important; }
+#bm-back {
+    font-size: 1.05rem;
+    color: var(--bm-ink);
+    opacity: 0.8;
+    cursor: pointer;
+    padding: 4px 8px 4px 0;
+}
+#bm-back:active { opacity: 1; }
+#bm-title {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--bm-ink);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+/* The arrow stays on the home screen too — there it means "characters",
+   and without it the home screen has no navigation at all. */
+body.bm-home #bm-title { color: var(--bm-name); font-size: 1.15rem; }
+
+/* ---------------------------------------------------- chat surface */
+
+/* A scrim over the background image: the art still reads, the text stays
+   legible, and there's no expensive filter involved. */
+#chat {
+    background: linear-gradient(180deg,
+                rgba(10, 10, 16, 0.74) 0%,
+                rgba(10, 10, 16, 0.88) 100%) !important;
+    padding: 12px 12px 6px !important;
+}
+
+/* Character art as the backdrop (index.js sets --bm-char-bg).
+   It goes on #sheld, NOT #chat: #chat scrolls, and a background on a
+   scrolling box sizes against its full scroll height — which is why the art
+   showed up as a thin sliver. #sheld is a fixed-size box, so cover works. */
+/* Scrim AND art both live here, as two layers of one background.
+   Crucially NOT on #chat: that element scrolls, so a gradient on it is sized
+   against the whole scroll height (67 messages tall) rather than the visible
+   box — which left the bottom of the screen still translucent and produced a
+   warm band of art above the input. #sheld is fixed-size, so this is exact. */
+body.bm-has-char-bg #sheld {
+    background-image:
+        linear-gradient(180deg,
+            rgba(9, 9, 14, 0.88) 0%,
+            rgba(9, 9, 14, 0.95) 65%,
+            rgba(9, 9, 14, 1) 88%,
+            rgba(9, 9, 14, 1) 100%),
+        var(--bm-char-bg) !important;
+    background-size: cover, cover !important;
+    background-position: center, center top !important;
+    background-repeat: no-repeat, no-repeat !important;
+}
+/* Transparent: #sheld above carries both the art and its scrim. Putting any
+   gradient here would be sized against the scroll height, not the screen. */
+body.bm-has-char-bg #chat {
+    background: transparent !important;
+}
+
+/* ---------------------------------------------------- message block */
+
+.mes {
+    display: block !important;
+    background: none !important;
+    border: none !important;
+    box-shadow: none !important;
+    padding: 5px 0 !important;
+    margin: 0 !important;
+}
+
+.mesAvatarWrapper,
+.mesIDDisplay,
+.mes_timer,
+.tokenCounterDisplay,
+.for_checkbox,
+.del_checkbox { display: none !important; }
+
+.mes_block {
+    /* a gentle top-lit gradient rather than one flat fill — this is what
+       stops a bubble reading as a grey box */
+    background: linear-gradient(158deg,
+                rgba(38, 38, 52, 0.92) 0%,
+                rgba(23, 23, 32, 0.93) 55%,
+                rgba(19, 19, 27, 0.94) 100%);
+    border: 1px solid rgba(255, 255, 255, 0.09);
+    border-radius: 6px 17px 17px 17px;   /* squared toward the speaker */
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.38);
+    padding: 9px 14px 11px !important;
+    margin: 0 !important;
+    /* fit-content so a short line gets a short bubble — a plain block would
+       stretch the full width and "Hi roxy" would look like a paragraph */
+    width: fit-content;
+    max-width: 92%;
+}
+
+/* ---------------------------------------------------- message header */
+
+.ch_name {
+    margin-bottom: 4px !important;
+    min-height: 0 !important;
+    align-items: center !important;
+}
+.ch_name > .flex-container { align-items: center !important; gap: 8px; }
+
+.beyondme-inline-avatar {
+    width: 22px !important;
+    height: 22px !important;
+    flex: 0 0 auto !important;
+    margin: 0 !important;
+}
+.beyondme-inline-avatar img {
+    width: 22px !important;
+    height: 22px !important;
+    border-radius: 50% !important;
+    object-fit: cover;
+    border: 1px solid var(--bm-line);
+}
+
+.ch_name .name_text {
+    font-size: 0.74rem !important;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    color: var(--bm-name);
+}
+
+/* ---------------------------------------------------- message text */
+
+.mes_text {
+    color: var(--bm-ink);
+    font-size: 0.99rem;
+    line-height: 1.62;
+}
+.mes_text p { margin: 0.32em 0; }
+.mes_text p:first-child { margin-top: 0; }
+.mes_text p:last-child { margin-bottom: 0; }
+
+/* Narration: its own line, muted and italic. No rule down the side — the
+   italic and the colour already separate it from speech. */
+.mes_text em.beyondme-narration,
+.mes_text i.beyondme-narration {
+    display: block;
+    margin: 0.45em 0;
+    color: var(--bm-muted);
+    font-style: italic;
+}
+.mes_text em, .mes_text i { color: var(--bm-muted); }
+
+/* ---------------------------------------------------- your messages */
+
+.mes[is_user="true"] .mes_block {
+    background: linear-gradient(145deg, #6d5cbf 0%, #55489c 55%, #453a7d 100%);
+    border-color: rgba(255, 255, 255, 0.14);
+    border-radius: 17px 6px 17px 17px;
+    box-shadow: 0 2px 12px rgba(69, 58, 125, 0.42);
+    margin-left: auto !important;
+    max-width: 84%;
+}
+.mes[is_user="true"] .ch_name .name_text { color: var(--bm-name-user); }
+.mes[is_user="true"] .mes_text { color: var(--bm-ink-user); }
+
+/* ---------------------------------------------------- message controls */
+
+.mes_buttons .mes_button { opacity: 0.28; font-size: 0.86em; }
+.mes_buttons .mes_button:hover,
+.mes_buttons .mes_button:active { opacity: 1; }
+
+.swipe_left, .swipe_right { opacity: 0.26; }
+.swipe_left:hover, .swipe_right:hover { opacity: 0.9; }
+
+/* ---------------------------------------------------- input bar */
+
+/* Solid, not the 80% scrim: a translucent bar let the character art bleed
+   through around the input, which read as a stray band of background. */
+#send_form {
+    background: #0c0c11 !important;
+    border: none !important;
+    padding: 9px 11px 11px !important;
+}
+
+/* flex-end keeps the buttons pinned to the bottom as the text grows */
+#nonQRFormItems {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--bm-line);
+    border-radius: 24px;
+    padding: 5px 6px 5px 7px;
+    align-items: flex-end !important;
+    gap: 6px;
+}
+
+#send_textarea {
+    background: transparent !important;
+    border: none !important;
+    outline: none !important;
+    color: var(--bm-ink) !important;
+    font-size: 0.98rem !important;
+    line-height: 1.45 !important;
+    padding: 7px 2px !important;
+    max-height: 32vh !important;      /* grow, then scroll */
+    overflow-y: auto !important;
+    resize: none !important;
+}
+#send_textarea::placeholder { color: #74748a; }
+
+#leftSendForm, #rightSendForm { align-self: flex-end; gap: 6px; }
+
+/* round chip buttons instead of bare glyphs */
+#beyondme-asterisk-btn,
+#options_button {
+    width: 32px;
+    height: 32px;
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: var(--bm-chip);
+    color: var(--bm-ink) !important;
+    opacity: 0.75;
+    font-size: 0.95em;
+    padding: 0 !important;
+    margin: 0 !important;
+    cursor: pointer;
+}
+#beyondme-asterisk-btn:active,
+#options_button:active { opacity: 1; }
+
+/* send: a filled accent circle, like a real chat app */
+#send_but {
+    width: 34px;
+    height: 34px;
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #7a68d8, #5546ad);
+    color: #ffffff !important;
+    font-size: 0.92em;
+    padding: 0 !important;
+    margin: 0 !important;
+}
+#mes_stop {
+    width: 34px; height: 34px;
+    display: flex !important;
+    align-items: center; justify-content: center;
+    border-radius: 50%;
+    background: rgba(220, 90, 90, 0.18);
+    color: #e88 !important;
+}
+
+/* ---------------------------------------------------- top icon row */
+
+#top-settings-holder {
+    background: var(--bm-scrim) !important;
+    border-bottom: 1px solid var(--bm-line);
+}
+#top-settings-holder .drawer-icon { opacity: 0.55; font-size: 1.02em; }
+#top-settings-holder .drawer-icon:hover { opacity: 1; }
+
+/* ---------------------------------------------------- home / lists */
+
+.welcomePanel { background: none !important; border: none !important; }
+.recentChatsTitle {
+    font-size: 0.7rem !important;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--bm-muted) !important;
+    font-weight: 700;
+}
+.recentChat,
+.character_select {
+    background: var(--bm-bubble) !important;
+    border: 1px solid var(--bm-bubble-brd) !important;
+    border-radius: 14px !important;
+    padding: 11px 12px !important;
+    margin-bottom: 9px !important;
+    align-items: center !important;
+}
+.recentChat .avatar img { border-radius: 50% !important; }
+.recentChat .characterName { color: var(--bm-name) !important; }
+.recentChat .chatMessage { color: var(--bm-muted) !important; }
+
+/* the wordmark at the top of the character screen (injected by index.js) */
+#bm-chars-title {
+    font-size: 1.35rem;
+    font-weight: 300;
+    letter-spacing: 0.04em;
+    color: var(--bm-name);
+    padding: 14px 12px 2px;
+}
+
+/* ---- character cards: portrait posters in a grid, JuicyChat style ---- */
+
+#rm_print_characters_block {
+    display: grid !important;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+    padding: 10px 8px 16px !important;
+    /* Without this the rows stretch to fill the container height: cards keep
+       their 3:4 ratio and sit at the top of ~400px rows, leaving a 149px hole
+       under each row. Measured in the browser, not guessed. */
+    align-content: start !important;
+}
+
+/* the hidden <template> copy of a card must never take a grid cell */
+.template_element .character_select { display: none !important; }
+
+.character_select {
+    display: block !important;
+    position: relative;
+    padding: 0 !important;
+    margin: 0 !important;
+    border-radius: 15px !important;
+    overflow: hidden;
+    aspect-ratio: 3 / 4;
+    background: var(--bm-bubble) !important;
+    border: 1px solid var(--bm-bubble-brd) !important;
+}
+
+/* the art fills the whole card */
+.character_select .avatar,
+.character_select .avatar img {
+    width: 100% !important;
+    height: 100% !important;
+    max-width: none !important;
+    max-height: none !important;
+    border-radius: 0 !important;
+    object-fit: cover;
+    display: block;
+}
+
+/* name sits on the art, over a gradient so it stays readable */
+.character_select .character_select_container {
+    position: absolute !important;
+    left: 0; right: 0; bottom: 0;
+    width: auto !important;
+    padding: 26px 10px 10px !important;
+    background: linear-gradient(180deg,
+                rgba(0, 0, 0, 0) 0%,
+                rgba(0, 0, 0, 0.55) 45%,
+                rgba(0, 0, 0, 0.88) 100%);
+}
+.character_select .character_name_block { width: 100% !important; }
+.character_select .ch_name {
+    color: #ffffff !important;
+    font-size: 0.88rem !important;
+    font-weight: 700;
+    line-height: 1.25;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.6);
+}
+
+/* filename / version / description noise has no place on a poster */
+.character_select .ch_avatar_url,
+.character_select .character_version,
+.character_select .ch_add_placeholder,
+.character_select .ch_assistant,
+.character_select .ch_description { display: none !important; }
+
+/* The star IS the pin. SillyTavern renders it display:none until a character
+   is already a favourite — which means there's no way to pin one in the first
+   place. Force it visible so it works as a toggle. */
+.character_select .ch_fav_icon {
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    position: absolute !important;
+    top: 6px; right: 6px;
+    z-index: 3;
+    width: 30px;
+    height: 30px;
+    color: #ffffff !important;
+    opacity: 0.65;
+    font-size: 0.85rem;
+    padding: 0 !important;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.5);
+}
+.character_select[is_fav="true"] .ch_fav_icon,
+.character_select .ch_fav_icon.fav_on {
+    color: #f2c66b !important;
+    opacity: 1;
+}
+/* pinned characters float to the front of the grid */
+.character_select[is_fav="true"] {
+    order: -1;
+    border-color: rgba(242, 198, 107, 0.45) !important;
+}
+
+.beyondme-hide { display: none !important; }
+
+/* the way out of a full-screen panel (index.js toggles .bm-visible) */
+#bm-drawer-close {
+    display: none;
+    position: fixed;
+    top: 12px;
+    right: 12px;
+    z-index: 3600;
+    width: 38px;
+    height: 38px;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: rgba(20, 20, 28, 0.9);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    color: var(--bm-ink);
+    font-size: 1.05rem;
+    cursor: pointer;
+}
+#bm-drawer-close.bm-visible { display: flex; }
+
+@media (min-width: 1001px) {
+    #beyondme-asterisk-btn { display: none !important; }
+}
+
+/* ============================================================
+   PHONE ONLY
+   ============================================================ */
+@media (max-width: 1000px) {
+
+    #bm-chat-header { display: flex; }
+
+    /* The icon row is PARKED OFF-SCREEN, not display:none.
+       Two reasons:
+       1. the back arrow clicks its drawer toggle — you can't click a
+          display:none element, and juggling display caused the flicker
+       2. it never overlaps the beyondme header the way a revealed bar did
+       Navigation is the header's back arrow; the laptop keeps the full row. */
+    #top-settings-holder {
+        position: fixed !important;
+        top: -400px !important;
+        left: 0 !important;
+        right: 0 !important;
+        /* MUST stay high: the character drawer is a CHILD of this element, so
+           a low z-index here traps the drawer in a stacking context below the
+           chat shell (z-index 30) — which made the home screen paint over the
+           character cards. The bar itself is harmless, it's off-screen. */
+        z-index: 3000 !important;
+    }
+
+    /* empty strips left behind by the hidden icon row */
+    #top-bar { display: none !important; }
+    #sheldheader { display: none !important; }
+
+    /* Pin the chat shell to the viewport edges. Hiding the icon row left it
+       floating, with the background showing through above and below. Fixed +
+       inset:0 is what actually removes the gaps — a height alone doesn't,
+       because the shell still sits at its original offset. */
+    #sheld {
+        position: fixed !important;
+        left: 0 !important;
+        right: 0 !important;
+        top: 0 !important;
+        bottom: 0 !important;
+        width: 100% !important;
+        /* 100dvh, NOT auto: with auto this collapses to its content (measured
+           at 100px) instead of stretching. dvh already tracks the phone's
+           shrinking/growing browser chrome. */
+        height: 100dvh !important;
+        max-height: 100dvh !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        border-radius: 0 !important;
+        display: flex !important;
+        flex-direction: column !important;
+    }
+    /* header and input keep their natural size; the chat takes the rest.
+       min-height:0 is required or a flex child refuses to shrink and the
+       whole column collapses to its content. */
+    #bm-chat-header { flex: 0 0 auto !important; }
+    #chat {
+        flex: 1 1 auto !important;
+        min-height: 0 !important;
+        overflow-y: auto !important;
+    }
+    #form_sheld {
+        flex: 0 0 auto !important;
+        margin-bottom: 0 !important;
+        padding-bottom: 0 !important;
+    }
+
+    /* Drawers sit above the fullscreen chat shell, and start at the very top:
+       SillyTavern offsets them by 35px for its icon row, which we've parked
+       off-screen — that strip was letting the home screen bleed through. */
+    #right-nav-panel,
+    #left-nav-panel,
+    .drawer-content {
+        z-index: 3000 !important;
+        top: 0 !important;
+        height: 100dvh !important;
+        max-height: 100dvh !important;
+    }
+
+    /* the header already says "beyondme" — don't say it twice */
+    .welcomeHeaderTitle { display: none !important; }
+
+    /* character panel: just the cards.
+       Hides the HotSwaps hint, the create/import/sort bar, the tag filter
+       chips, and the grid/bulk-edit pagination strip. */
+    #CharListButtonAndHotSwaps,
+    #right-nav-panelheader,
+    #rm_button_bar,
+    .rm_tag_controls,
+    #rm_print_characters_pagination { display: none !important; }
+
+    /* the home screen is a picker, not a chat */
+    body.bm-home #send_form { display: none !important; }
+
+    /* icon row contents: connection + character list only */
+    /* #backgrounds-button stays — it's how you swap the chat backdrop
+       from the character's art to a scene. */
+    #ai-config-button,
+    #advanced-formatting-button,
+    #WI-SP-button,
+    #user-settings-button,
+    #extensions-settings-button,
+    #persona-management-button { display: none !important; }
+
+    /* input bar: ✱ · options · textbox · stop · continue · send */
+    #mes_impersonate,
+    #stscript_continue,
+    #stscript_pause,
+    #stscript_stop,
+    #extensionsMenuButton { display: none !important; }
+
+    /* character panel: a list to pick from, not the card editor.
+       #rm_button_back stays — it's the way back to the list. */
+    #descriptionWrapper,
+    #firstMessageWrapper,
+    #name_div,
+    #tags_div,
+    #result_info,
+    #char-management-dropdown,
+    #character_open_media_overrides,
+    .extension_token_counter,
+    #favorite_button,
+    #advanced_div,
+    #world_button,
+    .chat_lorebook_button,
+    #char_connections_button,
+    #export_button,
+    #dupe_button,
+    #create_button_label,
+    #delete_button { display: none !important; }
+
+    div:has(> #creator_notes_textarea) { display: none !important; }
+
+    /* home page chrome */
+    .welcomeHeaderVersionDisplay,
+    .welcomeShortcuts,
+    .welcomeHeaderTitle .mes_button,
+    .chatStats,
+    button.drawer-opener[data-target="sys-settings-button"],
+    button.drawer-opener[data-target="rightNavHolder"],
+    button.drawer-opener[data-target="extensions-settings-button"] { display: none !important; }
+}

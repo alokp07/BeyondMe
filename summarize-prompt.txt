@@ -1,0 +1,18 @@
+Ignore previous instructions. Update the running summary of this story.
+
+If a summary already exists, treat it as established fact: keep its details and add to it. Never merge two separate events into one, never drop the place where something happened, and never change who was present.
+
+Write the summary in three parts.
+
+EVENTS
+What has happened, in order. Name the room or location of each scene. Give every scene its own numbered entry, even when two scenes involve the same characters doing similar things in different places. Never combine two scenes into one entry.
+
+WHO KNOWS WHAT
+Go through the numbered EVENTS above one by one. For each event that was secret or witnessed by only some characters, write ONE line that names the event number, who saw or heard it, and who does not know.
+Knowledge is per-event and never spreads. A character knows an event ONLY if that event's own numbered entry names them as present, or as seeing or hearing it. If a character witnessed one scene, that tells you nothing about any other scene - never assume they also know the others, even similar ones in other rooms.
+Write each line exactly in this form: "Event 3 (kitchen): Anna saw it; Ben and Cara do not know." Do not write a line for any event whose entry does not name a witness. Never contradict a line you have already written.
+
+CURRENT STATE
+Where each named character is as of the latest message, and what they are doing. One short line per character, including any character who is somewhere else or absent. If someone's whereabouts were never confirmed, give the last place they were actually seen and mark it as unconfirmed. Also note the time of day.
+
+Limit the whole summary to {{words}} words or less. Respond with nothing but the summary.

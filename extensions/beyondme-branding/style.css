@@ -1,0 +1,14 @@
+/* beyondme wordmark — replaces the 30x30 logo image in the welcome panel header.
+   Sits inside .welcomeHeaderTitle, a flex row with 10px gap and centred items,
+   so it must stay inline-sized and not force a line break. */
+.beyondme-wordmark {
+    display: inline-block;
+    flex: 0 0 auto;
+    font-size: 1.3rem;
+    font-weight: 300;
+    letter-spacing: 0.04em;
+    line-height: 30px;
+    white-space: nowrap;
+    opacity: 0.92;
+    user-select: none;
+}

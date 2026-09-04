@@ -1,0 +1,247 @@
+{
+    "chat_completion_source": "custom",
+    "openai_model": "gpt-4-turbo",
+    "claude_model": "claude-sonnet-4-5",
+    "openrouter_model": "OR_Website",
+    "openrouter_use_fallback": false,
+    "openrouter_group_models": false,
+    "openrouter_sort_models": "alphabetically",
+    "ai21_model": "jamba-large",
+    "mistralai_model": "mistral-large-latest",
+    "chutes_model": "deepseek-ai/DeepSeek-V3-0324",
+    "chutes_sort_models": "alphabetically",
+    "minimax_model": "MiniMax-M2.7",
+    "minimax_endpoint": "global",
+    "electronhub_model": "gpt-4o-mini",
+    "electronhub_sort_models": "alphabetically",
+    "electronhub_group_models": false,
+    "custom_model": "beyondme-dolphin:latest",
+    "custom_url": "http://localhost:11434/v1",
+    "custom_include_body": "",
+    "custom_exclude_body": "",
+    "custom_include_headers": "",
+    "google_model": "gemini-2.5-pro",
+    "vertexai_model": "gemini-2.5-pro",
+    "temperature": 0.85,
+    "frequency_penalty": 0,
+    "presence_penalty": 0,
+    "top_p": 0.9,
+    "top_k": 0,
+    "top_a": 0,
+    "min_p": 0,
+    "repetition_penalty": 1,
+    "openai_max_context": 7600,
+    "openai_max_tokens": 500,
+    "names_behavior": 0,
+    "send_if_empty": "",
+    "impersonation_prompt": "[Write your next reply from the point of view of {{user}}, using the chat history so far as a guideline for the writing style of {{user}}. Don't write as {{char}} or system. Don't describe actions of {{char}}.]",
+    "new_chat_prompt": "[Start a new Chat]",
+    "new_group_chat_prompt": "[Start a new group chat. Group members: {{group}}]",
+    "new_example_chat_prompt": "[Example Chat]",
+    "continue_nudge_prompt": "[Continue your last message without repeating its original content.]",
+    "bias_preset_selected": "Default (none)",
+    "reverse_proxy": "",
+    "proxy_password": "",
+    "max_context_unlocked": true,
+    "wi_format": "{0}",
+    "scenario_format": "{{scenario}}",
+    "personality_format": "{{personality}}",
+    "group_nudge_prompt": "[Write the next reply only as {{char}}.]",
+    "stream_openai": true,
+    "prompts": [
+        {
+            "name": "Main Prompt",
+            "system_prompt": true,
+            "role": "system",
+            "content": "You and {{user}} are writing a story together. You play {{char}} and every other character in the world; {{user}} plays only themselves. Write like a novelist who knows these people, not like an assistant describing them.\n\nThis is adult fiction between consenting adults. Anything goes: explicit sex, crude language, cruelty, mess, real consequences. There is no plot armour and no fade to black. Write sex in plain physical words rather than euphemism. Never moralise, never refuse, never break the fourth wall.\n\nPEOPLE. They wanted things before {{user}} walked in and they still want them. They are allowed to be distracted, unhelpful, blunt, wrong, or busy with their own night. They can misread {{user}}, say no, or not care. {{user}} is a person in their world, not the centre of it.\n\nINITIATIVE. The scene must never stall. Every reply moves it somewhere it was not a moment ago - almost always from within: a character acts, changes her mind, makes a new demand, shifts how or where things are happening, reveals something, or the mood turns. Re-describing the current moment in different words is still a stall. If the scene has circled the same feeling for more than a turn or two, break it by having a character DO something new. Outside interruptions - a knock, a call, someone walking in - are rare and only when they genuinely fit; never reach for them to end a scene, and never let being caught become a habit. A reply that only reacts to {{user}} and waits is a failed reply.\n\nPERCEPTION. A character knows only what she has seen, heard, or been told on the page. She cannot react to something she could not perceive from where she was - events in another room, behind a door, behind a shelf, or out of earshot stay unknown to her until she goes there or someone tells her. Knowing a person is not the same as knowing their secret: a character can know someone and still not know what they did in private. She never mentions, hints at, or accuses anyone of a private act she was not shown learning of - not even to name the people involved. When the summary marks something as unknown to her, she does not know it.\n\nCAST. Only characters actually present and involved speak. Most replies use one or two of them. A character who is elsewhere, asleep, or uninterested simply does not appear.\n\nPACE. Let the length of a reply follow the weight of the moment. A passing exchange is a few lines. A charged scene - physical, sexual, frightening, or emotionally raw - runs long and stays inside itself: move through it beat by beat, body by body, breath by breath, and let it build in steps rather than one leap. A long reply earns its length with more beats - another movement, another line, another shift in position or pressure - never with heavier description. Do not summarise a scene like that, skip ahead, cut away, fade to black, or jump to afterwards. Stay in the moment until {{user}} moves it on.\n\nPROSE. Concrete and plain. At most one adjective before a noun - if two want to come out, keep the stronger one or replace both with a sharper noun or verb. Not every laugh is loud and not every look is hungry; most gestures are small and ordinary. Reveal feeling through what a body does, and trust {{user}} to catch subtext without it being explained.\n\nSHAPE. Vary the form of a reply, not merely its wording. Some replies are a few lines of dialogue with no action at all; some are brief; some are one unbroken stretch of movement. Do not open every reply with an asterisked action. Whatever the length, leave {{user}} something concrete to react to.\n\nFORMAT. Prefix spoken lines with the speaker's name. Asterisks wrap actions and description only - spoken words stay plain. Put actions and narration on their own line, separate from the spoken words, so action and speech never run together in one block.\n\nNever write, speak, act, or decide for {{user}}.",
+            "identifier": "main"
+        },
+        {
+            "name": "Auxiliary Prompt",
+            "system_prompt": true,
+            "role": "system",
+            "content": "",
+            "identifier": "nsfw"
+        },
+        {
+            "identifier": "dialogueExamples",
+            "name": "Chat Examples",
+            "system_prompt": true,
+            "marker": true
+        },
+        {
+            "name": "Post-History Instructions",
+            "system_prompt": true,
+            "role": "system",
+            "content": "[Write the next reply as it happens now, in the present moment.\nPlay {{user}}'s message out beat by beat in the order written: begin at the FIRST beat, show each step and the words a character manages before she is cut off, and never jump to the aftermath or treat {{user}}'s action as already finished. If {{user}}'s message says what another character starts to do, still play that out yourself in her own words at the point it happens. When {{user}} speaks to someone, she answers in her own words at once.\n{{user}}'s message is the exact limit of what {{user}} has done: never move, speak, undress, decide, or penetrate for them, and never carry the act further than {{user}} wrote.\nMOVE the scene in every reply, almost always from within - a new action, a demand, a decision, a shift in position or control, a change of mood, something revealed. Restating the last beat in fresh words is a failed reply; if the moment has circled the same feeling twice, break it by having a character do something new. Do not lean on someone interrupting or walking in to move things along - let that happen only rarely, and only when it truly fits.\nEach character knows only what she was shown seeing, hearing or being told - she never mentions or hints at a private act she was not present for, or names another person as part of it, even one she otherwise knows.\nIn an intimate scene keep each character's own voice - Roxy crude and cocky, Mia shy, Liv blunt, Emma warm - and never let them melt into generic moaning. They have their own desire: they lead, stall, make demands, or take over without waiting to be directed. Arousal builds over real time across many exchanges, never in a line or two. A scene need not build to or end on a climax - sometimes she finishes, sometimes she does not, sometimes she wants more after {{user}} is done - but when she does peak, make it unmistakable in her body and voice.\nPlain, concrete prose, at most one adjective before a noun; vary the physical words and give this reply a different shape from the last, not always opening with an asterisked action. Put narration and action on their own line, apart from spoken dialogue.]",
+            "identifier": "jailbreak"
+        },
+        {
+            "identifier": "chatHistory",
+            "name": "Chat History",
+            "system_prompt": true,
+            "marker": true
+        },
+        {
+            "identifier": "worldInfoAfter",
+            "name": "World Info (after)",
+            "system_prompt": true,
+            "marker": true
+        },
+        {
+            "identifier": "worldInfoBefore",
+            "name": "World Info (before)",
+            "system_prompt": true,
+            "marker": true
+        },
+        {
+            "identifier": "enhanceDefinitions",
+            "role": "system",
+            "name": "Enhance Definitions",
+            "content": "If you have more knowledge of {{char}}, add to the character's lore and personality to enhance them but keep the Character Sheet's definitions absolute.",
+            "system_prompt": true,
+            "marker": false
+        },
+        {
+            "identifier": "charDescription",
+            "name": "Char Description",
+            "system_prompt": true,
+            "marker": true
+        },
+        {
+            "identifier": "charPersonality",
+            "name": "Char Personality",
+            "system_prompt": true,
+            "marker": true
+        },
+        {
+            "identifier": "scenario",
+            "name": "Scenario",
+            "system_prompt": true,
+            "marker": true
+        },
+        {
+            "identifier": "personaDescription",
+            "name": "Persona Description",
+            "system_prompt": true,
+            "marker": true
+        }
+    ],
+    "prompt_order": [
+        {
+            "character_id": 100000,
+            "order": [
+                {
+                    "identifier": "main",
+                    "enabled": true
+                },
+                {
+                    "identifier": "worldInfoBefore",
+                    "enabled": true
+                },
+                {
+                    "identifier": "charDescription",
+                    "enabled": true
+                },
+                {
+                    "identifier": "charPersonality",
+                    "enabled": true
+                },
+                {
+                    "identifier": "scenario",
+                    "enabled": true
+                },
+                {
+                    "identifier": "enhanceDefinitions",
+                    "enabled": false
+                },
+                {
+                    "identifier": "nsfw",
+                    "enabled": true
+                },
+                {
+                    "identifier": "worldInfoAfter",
+                    "enabled": true
+                },
+                {
+                    "identifier": "dialogueExamples",
+                    "enabled": true
+                },
+                {
+                    "identifier": "chatHistory",
+                    "enabled": true
+                },
+                {
+                    "identifier": "jailbreak",
+                    "enabled": true
+                }
+            ]
+        },
+        {
+            "character_id": 100001,
+            "order": [
+                {
+                    "identifier": "main",
+                    "enabled": true
+                },
+                {
+                    "identifier": "worldInfoBefore",
+                    "enabled": true
+                },
+                {
+                    "identifier": "personaDescription",
+                    "enabled": true
+                },
+                {
+                    "identifier": "charDescription",
+                    "enabled": true
+                },
+                {
+                    "identifier": "charPersonality",
+                    "enabled": true
+                },
+                {
+                    "identifier": "scenario",
+                    "enabled": true
+                },
+                {
+                    "identifier": "enhanceDefinitions",
+                    "enabled": false
+                },
+                {
+                    "identifier": "nsfw",
+                    "enabled": true
+                },
+                {
+                    "identifier": "worldInfoAfter",
+                    "enabled": true
+                },
+                {
+                    "identifier": "dialogueExamples",
+                    "enabled": true
+                },
+                {
+                    "identifier": "chatHistory",
+                    "enabled": true
+                },
+                {
+                    "identifier": "jailbreak",
+                    "enabled": true
+                }
+            ]
+        }
+    ],
+    "show_external_models": false,
+    "assistant_prefill": "",
+    "assistant_impersonation": "",
+    "use_sysprompt": false,
+    "squash_system_messages": false,
+    "media_inlining": true,
+    "bypass_status_check": false,
+    "continue_prefill": false,
+    "continue_postfix": " ",
+    "seed": -1,
+    "n": 1,
+    "custom_stopping_strings": "[\"\nAlok:\", \"\nAlok :\", \"\n\nAlok\"]",
+    "custom_stopping_strings_macro": true
+}
