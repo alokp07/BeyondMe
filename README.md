@@ -23,24 +23,45 @@ This repo is **configuration only**. It contains no API keys and no chat history
 
 ## Setup
 
-**1. Install SillyTavern**
+> **Read this first — there are two downloads, and you need both.**
+>
+> - **SillyTavern** is the *app*. It's the program that runs the chat.
+> - **beyondme** (this repo) is the *configuration* — the card, the prompts,
+>   the UI. It is not a program and cannot run on its own.
+>
+> So: install the app, then copy this configuration into it.
+> Think of SillyTavern as the game, and beyondme as the settings and mods.
+
+### Step 1 — get the app
 
 ```bash
 git clone https://github.com/SillyTavern/SillyTavern -b release
 cd SillyTavern
 ```
-Run `Start.bat` (Windows) or `start.sh` (Linux/Mac) once so it creates its data
-folder, then close it.
 
-**2. Install beyondme**
+### Step 2 — start it once, then close it
+
+Run `Start.bat` (Windows) or `start.sh` (Linux/Mac), wait for it to open in the
+browser, then close it. This makes it create the `data` folder that step 4
+copies into. **Don't skip this** — the installer needs that folder to exist.
+
+### Step 3 — get this configuration
 
 ```bash
 git clone https://github.com/alokp07/BeyondMe
 cd BeyondMe
+```
+
+### Step 4 — copy it into the app
+
+```bash
 python install.py "C:\path\to\SillyTavern"
 ```
 
-**3. Add your own API key**
+Use the path to the folder from step 1. The installer prints everything it
+copies. It never touches your API keys or your chats.
+
+### Step 5 — add your own API key
 
 Start SillyTavern, then **API Connections**:
 - API: **Chat Completion**
@@ -48,7 +69,7 @@ Start SillyTavern, then **API Connections**:
 - Paste a key from [aistudio.google.com](https://aistudio.google.com/apikey) (free)
 - Model: **gemini-3.5-flash-lite** for everyday use, **gemini-3.5-flash** for big scenes
 
-**4. Pick the preset**
+### Step 6 — pick the preset
 
 In the preset dropdown choose **Default** — that's where the tuned prompts live.
 
