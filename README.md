@@ -128,16 +128,50 @@ maximised — it costs nothing extra and the memory is much better for it.
 
 ## Playing on your phone
 
-The UI is built phone-first. To reach it from your phone, run SillyTavern on a
-computer and connect over [Tailscale](https://tailscale.com) (free):
+The UI is built phone-first. Your computer runs the server; the phone is just a
+window onto it, over [Tailscale](https://tailscale.com) (free). Your chats never
+leave your machine.
 
-1. Install Tailscale on both devices, sign in with the same account.
-2. In SillyTavern's `config.yaml`: `listen: true`, `whitelistMode: false`,
-   `basicAuthMode: true`, and set your own username/password.
-3. On the phone, open `http://<computer's tailscale ip>:8000`.
+**1. Install Tailscale** on the computer and the phone, signed into the same
+account. In the Tailscale admin console, enable **MagicDNS** and **HTTPS
+Certificates** (both free).
 
-For a fullscreen app icon you need HTTPS — `tailscale serve --bg 8000` gives you
-a valid certificate, then "Install / Add to Home Screen" from the browser menu.
+**2. Edit `config.yaml`** in your SillyTavern folder:
+
+```yaml
+whitelistMode: false
+basicAuthMode: true
+basicAuthUser:
+  username: pick-your-own
+  password: pick-a-real-one
+```
+
+That password is the only thing standing between your chats and anyone else on
+your network — make it a real one. You do **not** need `listen: true`: Tailscale
+connects to the server over localhost.
+
+**3. Start the server**, then run once:
+
+```bash
+tailscale serve --bg 8000
+```
+
+It prints your address:
+
+```
+https://your-pc.tailXXXX.ts.net/
+```
+
+That address is permanent and survives reboots — this is a one-time step.
+
+**4. On the phone**, open that `https://` address, log in, then use the browser
+menu → **Install / Add to Home Screen**. You get a real fullscreen app icon.
+
+> The HTTPS matters: browsers only allow a proper fullscreen install on a secure
+> origin. Over plain `http://100.x.x.x:8000` you'd get a shortcut that opens in
+> the browser with an address bar.
+
+The computer has to be on and running the server while you play on the phone.
 
 ---
 
