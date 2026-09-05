@@ -79,7 +79,22 @@ function main() {
         console.log(`  + extensions/${ext}`);
     }
 
-    // ---- 4. patch settings.json -------------------------------------------
+    // ---- 4. the launcher, into the SillyTavern root --------------------
+    // Leaner than Start.bat: skips the npm install pass that otherwise runs
+    // on every single launch.
+    const launcherDir = path.join(HERE, 'launcher');
+    if (fs.existsSync(launcherDir)) {
+        for (const f of fs.readdirSync(launcherDir)) {
+            const dst = path.join(root, f);
+            fs.copyFileSync(path.join(launcherDir, f), dst);
+            if (f.endsWith('.sh')) {
+                try { fs.chmodSync(dst, 0o755); } catch {}
+            }
+            console.log(`  + ${f}  (in the SillyTavern folder)`);
+        }
+    }
+
+    // ---- 5. patch settings.json -------------------------------------------
     // Only the keys this setup depends on. Keys live in secrets.json, which is
     // never touched.
     const sp = path.join(data, 'settings.json');
@@ -111,7 +126,7 @@ function main() {
     console.log('  + settings.json patched (prompts, temperature, UI, summariser)');
 
     console.log('\nDone. Next:');
-    console.log('  1. Start SillyTavern');
+    console.log('  1. Start it with beyondme.bat (Windows) or ./beyondme.sh');
     console.log('  2. API Connections -> add YOUR OWN Google AI Studio key');
     console.log("  3. Choose the 'Default' preset, then open College Roommates");
 }

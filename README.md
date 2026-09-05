@@ -17,6 +17,7 @@ This repo is **configuration only**. It contains no API keys and no chat history
 | `extensions/beyondme-branding/` | Renames SillyTavern → beyondme in the interface |
 | `summarize-prompt.txt` | The summariser prompt (event + "who knows what" tracking) |
 | `settings-values.json` | The few settings the setup depends on |
+| `launcher/` | The `beyondme` launcher, copied into your SillyTavern folder |
 | `install.bat` / `install.sh` | Double-click (Windows) or run (Mac/Linux) to install |
 | `install.js` | What those call — copies everything into place and patches the settings |
 
@@ -87,6 +88,28 @@ Open **College Roommates** and start.
 
 ---
 
+## Opening it after that
+
+The installer puts a **`beyondme`** launcher in your SillyTavern folder — use
+that from now on, not `Start.bat`:
+
+| | |
+|---|---|
+| **Windows** | double-click **`beyondme.bat`** |
+| **Mac / Linux** | `./beyondme.sh` |
+
+It's the same server, just leaner: `Start.bat` re-runs `npm install` on *every*
+launch, which the launcher skips. A console window opens and stays open — that
+**is** the app running, so leave it open while you play. Closing it stops the
+server.
+
+Then open **http://localhost:8000** in your browser.
+
+> After a `git pull` that updates SillyTavern itself, run `Start.bat` **once**
+> so new dependencies get installed, then go back to `beyondme.bat`.
+
+---
+
 ## What the tuning actually does
 
 - **Memory** — the whole chat is sent raw (200k context), plus a running summary
@@ -121,7 +144,7 @@ a valid certificate, then "Install / Add to Home Screen" from the browser menu.
 ## Privacy
 
 `.gitignore` blocks `secrets.json`, `chats/`, `backups/`, `vectors/` and
-`settings.json`. Your keys and conversations stay on your machine. `install.py`
+`settings.json`. Your keys and conversations stay on your machine. `install.js`
 never reads them.
 
 Everyone who installs this uses **their own API key**.
