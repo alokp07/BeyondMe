@@ -20,6 +20,7 @@ This repo is **configuration only**. It contains no API keys and no chat history
 | `launcher/` | The `beyondme` launcher, copied into your SillyTavern folder |
 | `install.bat` / `install.sh` | Double-click (Windows) or run (Mac/Linux) to install |
 | `install.js` | What those call — copies everything into place and patches the settings |
+| `phone-setup.bat` / `.sh` | One click: turns on HTTPS and prints the address for your phone |
 
 ---
 
@@ -133,10 +134,9 @@ window onto it, over [Tailscale](https://tailscale.com) (free). Your chats never
 leave your machine.
 
 **1. Install Tailscale** on the computer and the phone, signed into the same
-account. In the Tailscale admin console, enable **MagicDNS** and **HTTPS
-Certificates** (both free).
+account on both. Nothing else to configure there.
 
-**2. Edit `config.yaml`** in your SillyTavern folder:
+**2. Set a password.** In `config.yaml` in your SillyTavern folder:
 
 ```yaml
 whitelistMode: false
@@ -146,30 +146,31 @@ basicAuthUser:
   password: pick-a-real-one
 ```
 
-That password is the only thing standing between your chats and anyone else on
-your network — make it a real one. You do **not** need `listen: true`: Tailscale
-connects to the server over localhost.
+This is the one thing you must do by hand, and the one thing worth doing
+carefully: that password is all that stands between your chats and anyone else
+on your network.
 
-**3. Start the server**, then run once:
+**3. Start the server** (`beyondme.bat`), then double-click **`phone-setup.bat`**
+(Mac/Linux: `./phone-setup.sh`).
 
-```bash
-tailscale serve --bg 8000
-```
-
-It prints your address:
+It turns on Tailscale's HTTPS and prints your address:
 
 ```
-https://your-pc.tailXXXX.ts.net/
+  Done. Open this on your phone:
+
+    https://your-pc.tailXXXX.ts.net
 ```
 
-That address is permanent and survives reboots — this is a one-time step.
+If anything's missing it tells you exactly what — Tailscale not installed, HTTPS
+not enabled in the admin console, or a `config.yaml` setting that would block the
+phone. Run it once; the address is permanent and survives reboots.
 
-**4. On the phone**, open that `https://` address, log in, then use the browser
-menu → **Install / Add to Home Screen**. You get a real fullscreen app icon.
+**4. On the phone**, open that address, log in, then browser menu →
+**Install / Add to Home Screen** for a fullscreen app icon.
 
-> The HTTPS matters: browsers only allow a proper fullscreen install on a secure
-> origin. Over plain `http://100.x.x.x:8000` you'd get a shortcut that opens in
-> the browser with an address bar.
+> HTTPS is what makes that fullscreen install possible — over plain
+> `http://100.x.x.x:8000` you'd only get a shortcut that opens in the browser
+> with an address bar.
 
 The computer has to be on and running the server while you play on the phone.
 
